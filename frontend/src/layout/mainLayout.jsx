@@ -4,15 +4,12 @@ import "../styles/layout.css";
 
 function MainLayout() {
   return (
-    <div className="main-layout d-flex">
-      
+    <div className="main-layout">
+      <Navbar />
 
-      <div className="content-area">
-        <Navbar />
-        <main className="main-content">
-          <Outlet />
-        </main>
-      </div>
+      <main className="page-content">
+        <Outlet />
+      </main>
     </div>
   );
 }
