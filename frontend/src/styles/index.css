@@ -1,0 +1,26 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #2563eb;       
+  --primary-hover: #1d4ed8;
+  --secondary: #64748b;     
+  --background: #f8fafc;    
+  --surface: #ffffff;       
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --danger: #ef4444;        
+  --success: #10b981;       
+  
+  --sidebar-width: 260px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: var(--background); color: var(--text-main); }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
