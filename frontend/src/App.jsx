@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { Toaster } from 'react-hot-toast'; 
 import '../../frontend/src/styles/App.css';
 import InventoryModule from './pages/SPAL/InventoryModule';
+import VehicalModule from './pages/vehicalManagement/VehicleModule';
 
 
 // The Homepage
@@ -60,7 +61,8 @@ function App() {
             <Routes>
               <Route path="/" element={<DashboardHome />} />
               
-              <Route path="/inventory" element={<InventoryModule />} />             
+              <Route path="/inventory" element={<InventoryModule />} />
+              <Route path="/vehical" element={<VehicalModule />} />             
              
             </Routes>
           </div>

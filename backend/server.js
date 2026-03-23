@@ -26,9 +26,15 @@ connectDB();
 app.get('/', (req, res) => {
     res.send('Vehicle Service Center API is running!');
 });
+app.use('/api/customers', require('./routes/customerRoutes'));
+
+
+
+app.use('/api/vehicles', require('./routes/vehicleRoutes'));   
 
 
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
