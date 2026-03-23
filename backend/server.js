@@ -29,15 +29,12 @@ app.get('/', (req, res) => {
 app.use('/api/customers', require('./routes/customerRoutes'));
 
 
+
 app.use('/api/vehicles', require('./routes/vehicleRoutes'));   
 
-app.use('/api/bookings', require('./routes/bookingRoutes'));
 
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 
-app.use('/api/service-records', require('./routes/serviceRecordRoutes'));
-
-app.use('/api/bills', require('./routes/billRoutes'));
 
 // Start the server
 const PORT = process.env.PORT || 5000;
