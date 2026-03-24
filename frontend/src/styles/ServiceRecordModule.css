@@ -1,0 +1,145 @@
+/* src/pages/ServiceRecordModule.css */
+
+/* --- BLINKING LIVE INDICATOR --- */
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  border: 1px solid #fecaca;
+}
+
+.blink-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #dc2626;
+  border-radius: 50%;
+  animation: blinker 1.5s linear infinite;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
+
+/* --- TASK CARDS --- */
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.task-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top: 5px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.task-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.task-card.urgent {
+  border-top-color: #dc2626;
+  background: #fffcfc;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+/* --- ACTIVE WORKSPACE --- */
+.workspace-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.workspace-panel {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 25px;
+  box-shadow: var(--shadow-sm);
+}
+
+.workspace-left { flex: 1; }
+.workspace-right { flex: 1; background: #f8fafc; }
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.checklist-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--success);
+}
+
+/* --- PARTS & BILLING --- */
+.parts-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  margin-bottom: 20px;
+  background: white;
+}
+
+.parts-table th, .parts-table td {
+  padding: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.parts-table th { background: #f1f5f9; color: var(--text-muted); }
+
+.billing-summary {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.billing-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.billing-total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px dashed #93c5fd;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #1e3a8a;
+}
