@@ -1,46 +1,41 @@
+// backend/models/ServiceRecord.js
 const mongoose = require('mongoose');
 
 const serviceRecordSchema = new mongoose.Schema({
-  // recordId: Logical PK (Unique) - e.g., "REC-5022"
-  recordId: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  // bookingId: Foreign Key linking to Service Booking
-  bookingId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Booking', // Assuming your booking model is named 'Booking'
-    required: true 
-  },
-  // usedParts: Array of Objects linking to products/inventory
-  usedParts: [{
-    productId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Part' // Assuming your parts/inventory model is named 'Part'
+    // Link back to the original booking
+    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true },
+    
+    vehicleNumber: { type: String, required: true },
+    customerName: { type: String, required: true },
+    serviceDate: { type: String, required: true },
+    
+    // Status tracking
+    status: { 
+        type: String, 
+        enum: ['In Progress', 'Completed'], 
+        default: 'In Progress' 
     },
-    quantityUsed: { 
-      type: Number, 
-      required: true,
-      default: 1
-    }
-  }],
-  // mechanicName: The staff member performing the service
-  mechanicName: { 
-    type: String, 
-    required: true 
-  },
-  // actualDate: Date the service was completed (YYYY-MM-DD)
-  actualDate: { 
-    type: String, 
-    required: true 
-  },
-  // status: Default is "In-Progress"
-  status: { 
-    type: String, 
-    default: 'In-Progress',
-    enum: ['Pending', 'In-Progress', 'QC', 'Completed'] // Optional: restrict status values
-  }
-}, { timestamps: true }); // Adds createdAt and updatedAt automatically
+    
+    // The services they actually completed
+    servicesPerformed: [{ type: String }],
+    
+    // The parts pulled from Inventory
+    usedParts: [{
+        partId: { type: mongoose.Schema.Types.ObjectId, ref: 'Inventory' },
+        partName: { type: String },
+        quantity: { type: Number },
+        unitPrice: { type: Number },
+        totalPrice: { type: Number }
+    }],
+    
+    // Live Financial Tracking
+    bookingCost: { type: Number, required: true }, // The original quote
+    partsCost: { type: Number, default: 0 },       // Calculated from usedParts
+    additionalCharges: { type: Number, default: 0 }, // E.g., found a leak, charged 2000 extra
+    finalTotal: { type: Number, required: true },  // bookingCost + partsCost + additionalCharges
+    
+    mechanicNotes: { type: String }
+
+}, { timestamps: true });
 
 module.exports = mongoose.model('ServiceRecord', serviceRecordSchema);
