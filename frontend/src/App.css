@@ -1,42 +1,30 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* src/App.css */
+.app-layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--surface);
+  border-right: 1px solid #e2e8f0;
+  display: flex; flex-direction: column;
+  position: fixed; height: 100vh;
+  box-shadow: var(--shadow-sm);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
+.sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e2e8f0; }
+.sidebar-header h2 { color: var(--primary); font-size: 1.5rem; }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.sidebar-nav { padding: 20px 12px; display: flex; flex-direction: column; gap: 8px; }
+.nav-link {
+  text-decoration: none; color: var(--text-muted);
+  padding: 12px 16px; border-radius: var(--radius-md); font-weight: 500; transition: 0.2s;
 }
+.nav-link:hover { background-color: #f1f5f9; color: var(--primary); }
+.nav-link.active { background-color: #eff6ff; color: var(--primary); border-left: 4px solid var(--primary); }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
+.main-content { flex: 1; margin-left: var(--sidebar-width); background-color: var(--background); }
+.content-wrapper { padding: 40px; max-width: 1200px; margin: 0 auto; }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+.home-container h1 { margin-bottom: 10px; }
+.home-container p { color: var(--text-muted); margin-bottom: 30px; }
+.dashboard-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.stat-card { background: var(--surface); padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); text-align: center; font-weight: 600; color: var(--secondary); }
