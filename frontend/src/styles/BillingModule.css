@@ -1,0 +1,61 @@
+/* src/pages/BillingModule.css */
+
+/* THE SECURITY RED BLINK OVERLAY */
+.security-red-blink {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(220, 38, 38, 0.4); /* Transparent Red */
+  z-index: 9999;
+  pointer-events: none;
+  animation: alarmBlink 0.3s ease-in-out 3; /* Blinks 3 times fast */
+}
+
+@keyframes alarmBlink {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.billing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.bill-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.bill-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px dashed #e2e8f0;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.finance-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #475569;
+}
+
+.finance-row.grand-total {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #1e3a8a;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px solid #bfdbfe;
+}
