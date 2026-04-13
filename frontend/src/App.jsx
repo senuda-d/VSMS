@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import '../../frontend/src/styles/App.css';
 import InventoryModule from './pages/SPAL/InventoryModule';
 import VehicalModule from './pages/vehicalManagement/VehicleModule';
-
+import BookingModule from './pages/serviceBookings/BookingModule';
 
 // The Homepage
 const DashboardHome = () => (
@@ -62,7 +62,9 @@ function App() {
               <Route path="/" element={<DashboardHome />} />
               
               <Route path="/inventory" element={<InventoryModule />} />
-              <Route path="/vehical" element={<VehicalModule />} />             
+              <Route path="/vehical" element={<VehicalModule />} /> 
+              <Route path="/bookings" element={<BookingModule />} />
+            
              
             </Routes>
           </div>
