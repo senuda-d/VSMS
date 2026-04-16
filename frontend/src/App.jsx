@@ -2,10 +2,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast'; 
-import '../../frontend/src/styles/App.css';
-import InventoryModule from './pages/SPAL/InventoryModule';
-import VehicalModule from './pages/vehicalManagement/VehicleModule';
+import '../src/styles/App.css';
+import CustomerModule from './pages/customerManagement/CustomerModule';
+import VehicleModule from './pages/vehicalManagement/VehicleModule';
 import BookingModule from './pages/serviceBookings/BookingModule';
+import InventoryModule from './pages/SPAL/InventoryModule';
+import ServiceRecordModule from './pages/serviceRecord/ServiceRecordModule';
+import BillingModule from './pages/billing/BillingModule';
+import DashboardModule from './pages/dashboard/DashboardModule';
 
 // The Homepage
 const DashboardHome = () => (
@@ -59,13 +63,13 @@ function App() {
           
           <div className="content-wrapper">
             <Routes>
-              <Route path="/" element={<DashboardHome />} />
-              
-              <Route path="/inventory" element={<InventoryModule />} />
-              <Route path="/vehical" element={<VehicalModule />} /> 
+              <Route path="/" element={<DashboardModule />} />
+              <Route path="/customers" element={<CustomerModule />} />
+              <Route path="/vehicles" element={<VehicleModule />} />
               <Route path="/bookings" element={<BookingModule />} />
-            
-             
+              <Route path="/inventory" element={<InventoryModule />} />             
+              <Route path="/records" element={<ServiceRecordModule />} />
+              <Route path="/billing" element={<BillingModule />} />
             </Routes>
           </div>
         </main>

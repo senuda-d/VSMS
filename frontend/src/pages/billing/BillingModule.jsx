@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-// import "./BookingModule.css"; 
+import "../../styles/BookingModule.css"; 
 import "../../styles/BillingModule.css";
 
 const BillingModule = () => {
