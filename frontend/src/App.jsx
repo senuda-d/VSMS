@@ -25,6 +25,10 @@ import DashboardModule from './pages/dashboard/DashboardModule';
 
 import logoImg from './assets/logo.png';
 
+/**
+ * Main Application Shell: Handles routing and global layouts.
+ * Uses React Context / State for navigation persistence.
+ */
 const Sidebar = () => {
   const location = useLocation();
   const navItems = [
