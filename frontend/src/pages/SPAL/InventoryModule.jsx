@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Package, List, Calculator, Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import "../../styles/InventoryModule.css";
 
@@ -80,10 +81,10 @@ const InventoryModule = () => {
     try {
       if (editingId) {
         await axios.put(`http://localhost:5000/api/inventory/${editingId}`, payload);
-        toast.success("Item Updated Successfully! 📦");
+        toast.success("Item Updated Successfully!");
       } else {
         await axios.post("http://localhost:5000/api/inventory", payload);
-        toast.success("New Item Added to Inventory! ➕");
+        toast.success("New Item Added to Inventory!");
       }
       resetForm();
       fetchInventory();
@@ -157,14 +158,23 @@ const InventoryModule = () => {
 
       {/* --- NEW: TAB CONTROLS --- */}
       <div className="tab-container">
-        <button className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`} onClick={() => setActiveTab('add')}>
-          {editingId ? "✏️ Edit Item" : "➕ Add New Item"}
+        <button 
+          className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`}
+          onClick={() => { resetForm(); setActiveTab('add'); }}
+        >
+          <Plus size={16} /> Add New Item
         </button>
-        <button className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`} onClick={() => { setActiveTab('list'); setEditingId(null); resetForm(); }}>
-          📦 Inventory List
+        <button 
+          className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
+          onClick={() => setActiveTab('list')}
+        >
+          <List size={16} /> Global Stock List
         </button>
-        <button className={`tab-btn ${activeTab === 'calc' ? 'active' : ''}`} onClick={() => { setActiveTab('calc'); setEditingId(null); }}>
-          🧮 Calculator
+        <button 
+          className={`tab-btn ${activeTab === 'calc' ? 'active' : ''}`}
+          onClick={() => setActiveTab('calc')}
+        >
+          <Calculator size={16} /> Cost Calculator
         </button>
       </div>
 

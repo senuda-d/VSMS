@@ -1,30 +1,160 @@
-/* src/App.css */
-.app-layout { display: flex; min-height: 100vh; }
+/* src/styles/App.css */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+}
 
 .sidebar {
   width: var(--sidebar-width);
-  background-color: var(--surface);
-  border-right: 1px solid #e2e8f0;
-  display: flex; flex-direction: column;
-  position: fixed; height: 100vh;
-  box-shadow: var(--shadow-sm);
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  border-right: 1px solid rgba(255,255,255,0.05);
 }
 
-.sidebar-header { padding: 24px 20px; border-bottom: 1px solid #e2e8f0; }
-.sidebar-header h2 { color: var(--primary); font-size: 1.5rem; }
+.sidebar-brand {
+  padding: 2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
 
-.sidebar-nav { padding: 20px 12px; display: flex; flex-direction: column; gap: 8px; }
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+.sidebar-nav {
+  padding: 1.5rem 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .nav-link {
-  text-decoration: none; color: var(--text-muted);
-  padding: 12px 16px; border-radius: var(--radius-md); font-weight: 500; transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
 }
-.nav-link:hover { background-color: #f1f5f9; color: var(--primary); }
-.nav-link.active { background-color: #eff6ff; color: var(--primary); border-left: 4px solid var(--primary); }
 
-.main-content { flex: 1; margin-left: var(--sidebar-width); background-color: var(--background); }
-.content-wrapper { padding: 40px; max-width: 1200px; margin: 0 auto; }
+.nav-link:hover {
+  background-color: rgba(255,255,255,0.05);
+  color: white;
+}
 
-.home-container h1 { margin-bottom: 10px; }
-.home-container p { color: var(--text-muted); margin-bottom: 30px; }
-.dashboard-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.stat-card { background: var(--surface); padding: 30px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); text-align: center; font-weight: 600; color: var(--secondary); }
+.nav-link.active {
+  background-color: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.nav-icon {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  min-width: 0;
+}
+
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Common Industrial Components */
+.card-professional {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-accent:hover {
+  background: var(--accent-hover);
+}
