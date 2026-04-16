@@ -3,9 +3,15 @@ const Vehicle = require('../models/Vehicle');
 
 // Auto-generate VEH-1001
 const generateVehicleId = async () => {
-    const lastVehicle = await Vehicle.findOne().sort({ createdAt: -1 });
-    if (!lastVehicle) return 'VEH-1001';
-    const lastIdNumber = parseInt(lastVehicle.vehicleId.split('-')[1]);
+    const lastVehicle = await Vehicle.findOne({ vehicleId: /^VEH-\d+$/ })
+        .sort({ createdAt: -1 });
+    
+    if (!lastVehicle || !lastVehicle.vehicleId) return 'VEH-1001';
+    
+    const parts = lastVehicle.vehicleId.split('-');
+    const lastIdNumber = parseInt(parts[1]);
+    
+    if (isNaN(lastIdNumber)) return 'VEH-1001';
     return `VEH-${lastIdNumber + 1}`;
 };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../api';
 import { toast } from 'react-hot-toast';
 import '../../styles/CustomerModule.css';
 
@@ -23,7 +24,7 @@ const CustomerModule = () => {
 
   const fetchCustomers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/customers');
+      const res = await axios.get(API_ENDPOINTS.CUSTOMERS);
       setCustomers(res.data);
     } catch (err) {
       toast.error('Failed to load customers');
@@ -38,10 +39,10 @@ const CustomerModule = () => {
     e.preventDefault();
     try {
       if (editMode) {
-        await axios.put(`http://localhost:5000/api/customers/${currentCustomerId}`, formData);
+        await axios.put(`${API_ENDPOINTS.CUSTOMERS}/${currentCustomerId}`, formData);
         toast.success('Customer updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/customers', formData);
+        await axios.post(API_ENDPOINTS.CUSTOMERS, formData);
         toast.success('Customer registered successfully');
       }
       resetForm();
@@ -67,7 +68,7 @@ const CustomerModule = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this customer?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/customers/${id}`);
+        await axios.delete(`${API_ENDPOINTS.CUSTOMERS}/${id}`);
         toast.success('Customer deleted');
         fetchCustomers();
       } catch (err) {

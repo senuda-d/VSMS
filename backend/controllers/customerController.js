@@ -2,15 +2,19 @@ const Customer = require('../models/Customer');
 
 // Helper function to auto-generate the custom ID (e.g., CUST-1001)
 const generateCustomerId = async () => {
-    // Find the very last customer added to the database
-    const lastCustomer = await Customer.findOne().sort({ createdAt: -1 });
+    // Find customers with the correct format and sort them
+    const lastCustomer = await Customer.findOne({ customerId: /^CUST-\d+$/ })
+        .sort({ createdAt: -1 });
     
-    if (!lastCustomer) {
-        return 'CUST-1001'; // If database is empty, start here
+    if (!lastCustomer || !lastCustomer.customerId) {
+        return 'CUST-1001'; 
     }
     
-    // Split "CUST-1001" into an array ["CUST", "1001"], grab the number, and add 1
-    const lastIdNumber = parseInt(lastCustomer.customerId.split('-')[1]);
+    const parts = lastCustomer.customerId.split('-');
+    const lastIdNumber = parseInt(parts[1]);
+    
+    if (isNaN(lastIdNumber)) return 'CUST-1001';
+    
     return `CUST-${lastIdNumber + 1}`;
 };
 
