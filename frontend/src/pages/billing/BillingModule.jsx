@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { FileText, FileEdit, FileCheck, Receipt, Download, Trash2, Printer } from 'lucide-react';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "../../styles/BookingModule.css"; 
@@ -42,7 +43,7 @@ const BillingModule = () => {
       };
       
       await axios.post("http://localhost:5000/api/bills", payload);
-      toast.success("Draft Bill Created! 📝");
+      toast.success("Draft Bill Created!");
       fetchData();
       setActiveTab('drafts');
     } catch (error) { toast.error("Failed to create draft."); }
@@ -74,7 +75,7 @@ const BillingModule = () => {
         status: 'Finalized',
         finalizedAt: new Date()
       });
-      toast.success("Bill Finalized and Locked! 🔒");
+      toast.success("Bill Finalized and Locked!");
       fetchData();
       setActiveTab('final');
     } catch (error) { toast.error("Failed to finalize."); }
@@ -226,14 +227,23 @@ const BillingModule = () => {
       </div>
 
       <div className="tab-container">
-        <button className={`tab-btn ${activeTab === 'ready' ? 'active' : ''}`} onClick={() => setActiveTab('ready')}>
-          📥 Ready to Bill ({unbilledServices.length})
+        <button 
+          className={`tab-btn ${activeTab === 'ready' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ready')}
+        >
+          <Receipt size={16} /> Pending Jobs ({unbilledServices.length})
         </button>
-        <button className={`tab-btn ${activeTab === 'drafts' ? 'active' : ''}`} onClick={() => setActiveTab('drafts')}>
-          📝 Draft Bills ({draftBills.length})
+        <button 
+          className={`tab-btn ${activeTab === 'drafts' ? 'active' : ''}`}
+          onClick={() => setActiveTab('drafts')}
+        >
+          <FileEdit size={16} /> Draft Invoices ({draftBills.length})
         </button>
-        <button className={`tab-btn ${activeTab === 'final' ? 'active' : ''}`} onClick={() => setActiveTab('final')}>
-          🔒 Final Invoices
+        <button 
+          className={`tab-btn ${activeTab === 'final' ? 'active' : ''}`}
+          onClick={() => setActiveTab('final')}
+        >
+          <FileCheck size={16} /> Payment History
         </button>
       </div>
 

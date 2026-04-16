@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { CalendarPlus, ClipboardList, History, Bot, MessageSquare, Plus, Save } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import "../../styles/BookingModule.css"; 
 
@@ -354,14 +355,23 @@ const handleChat = (e) => {
       </div>
 
       <div className="tab-container">
-        <button className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`} onClick={() => setActiveTab('new')}>
-          {editingId ? "✏️ Edit Booking" : "➕ New Booking"}
+        <button 
+          className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('new'); resetForm(); }}
+        >
+          <CalendarPlus size={16} /> New Booking
         </button>
-        <button className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`} onClick={() => { setActiveTab('upcoming'); setEditingId(null); }}>
-          📅 Upcoming Schedule
+        <button 
+          className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
+          onClick={() => setActiveTab('upcoming')}
+        >
+          <ClipboardList size={16} /> Active Bookings
         </button>
-        <button className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setEditingId(null); }}>
-          📜 Service History
+        <button 
+          className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => setActiveTab('history')}
+        >
+          <History size={16} /> Booking History
         </button>
       </div>
 
@@ -660,25 +670,43 @@ const handleChat = (e) => {
       <div className="chat-container">
         {isChatOpen ? (
           <div className="chat-box">
-            <div style={{ padding: '15px', background: 'var(--text-main)', color: 'white', display: 'flex', justifyContent: 'space-between' }}>
-              <b>🤖 Service-Bot</b>
-              <button onClick={() => setIsChatOpen(false)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+            <div style={{ padding: '15px', background: 'var(--primary)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Bot size={20} />
+                <b>Service Assistant</b>
+              </span>
+              <button 
+                onClick={() => setIsChatOpen(false)} 
+                style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}
+              >
+                ×
+              </button>
             </div>
             <div style={{ flex: 1, padding: '15px', overflowY: 'auto', background: '#f8fafc', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {chatMessages.map((msg, i) => (
-                <div key={i} style={{ padding: '10px', borderRadius: '8px', maxWidth: '80%', alignSelf: msg.sender === 'bot' ? 'flex-start' : 'flex-end', background: msg.sender === 'bot' ? '#e2e8f0' : 'var(--primary)', color: msg.sender === 'bot' ? 'black' : 'white' }}>
+                <div key={i} style={{ padding: '10px', borderRadius: '8px', maxWidth: '80%', alignSelf: msg.sender === 'bot' ? 'flex-start' : 'flex-end', background: msg.sender === 'bot' ? '#e2e8f0' : 'var(--accent)', color: msg.sender === 'bot' ? 'black' : 'white' }}>
                   {msg.text}
                 </div>
               ))}
               <div ref={chatEndRef} />
             </div>
             <form onSubmit={handleChat} style={{ display: 'flex', padding: '10px', borderTop: '1px solid #e2e8f0', background: 'white' }}>
-              <input type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Type here..." style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', marginRight: '5px' }} />
-              <button type="submit" style={{ padding: '8px 15px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '4px' }}>Send</button>
+              <input 
+                type="text" 
+                value={chatInput} 
+                onChange={e => setChatInput(e.target.value)} 
+                placeholder="How can I help?" 
+                style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', marginRight: '5px' }} 
+              />
+              <button type="submit" style={{ padding: '8px 15px', background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '4px' }}>
+                Send
+              </button>
             </form>
           </div>
         ) : (
-          <button className="chat-bubble-btn" onClick={() => setIsChatOpen(true)}>💬</button>
+          <button className="chat-bubble-btn" onClick={() => setIsChatOpen(true)}>
+            <MessageSquare size={24} />
+          </button>
         )}
       </div>
 

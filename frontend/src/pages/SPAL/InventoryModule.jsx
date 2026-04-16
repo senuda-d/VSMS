@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Package, List, Calculator, Plus, Edit, Trash2, MinusCircle, PlusCircle } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import "../../styles/InventoryModule.css";
 
+// Industry standard categories for automotive spare parts
 const categories = [
   'Lubricants & Fluids', 
   'Filters', 
@@ -13,14 +15,19 @@ const categories = [
   'General Consumables'
 ];
 
+/**
+ * InventoryModule Component: Handles the full lifecycle of inventory management
+ * including CRUD operations, stock adjustments, and material cost calculations.
+ */
 const InventoryModule = () => {
-  // --- NEW: TAB STATE ---
+  // Navigation state management between tabs
   const [activeTab, setActiveTab] = useState('add'); // 'add', 'list', 'calc'
   
+  // Application Data States
   const [inventory, setInventory] = useState([]);
-  const [records, setRecords] = useState([]); 
+  const [records, setRecords] = useState([]); // Used for financial calculations from service records
   
-  // Form State
+  // Item Creation/Editing State
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -30,16 +37,20 @@ const InventoryModule = () => {
     reorderLevel: '5'
   });
 
-  // Filter States
+  // UI Filtering & Search States
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
 
-  // Calculator States
+  // Material Cost Calculator States (Internal business logic helper)
   const [calcItemPrice, setCalcItemPrice] = useState("");
   const [calcQty, setCalcQty] = useState(1);
 
+  /**
+   * Data Fetching: Synchronizes frontend state with MongoDB cluster
+   */
   const fetchInventory = async () => {
     try {
+      // Parallel execution for optimized performance
       const [invRes, recRes] = await Promise.all([
         axios.get("http://localhost:5000/api/inventory"),
         axios.get("http://localhost:5000/api/service-records")
@@ -47,7 +58,7 @@ const InventoryModule = () => {
       setInventory(invRes.data || []);
       setRecords(recRes.data || []);
     } catch (err) {
-      toast.error("Failed to load inventory data.");
+      toast.error("Network Link Error: Failed to load inventory data.");
     }
   };
 
@@ -55,7 +66,7 @@ const InventoryModule = () => {
     fetchInventory();
   }, []);
 
-  // Form Handlers
+  // Form Input Handlers with sanitization
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -63,13 +74,17 @@ const InventoryModule = () => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    const cleanValue = value.replace(/[^0-9.]/g, ''); 
+    const cleanValue = value.replace(/[^0-9.]/g, ''); // Enforce numeric input integrity
     setFormData({ ...formData, [name]: cleanValue });
   };
 
+  /**
+   * Persistence Logic: Saves new items or updates existing inventory entries
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Payload preparation with proper type casting
     const payload = {
       ...formData,
       price: Number(formData.price),
@@ -80,22 +95,57 @@ const InventoryModule = () => {
     try {
       if (editingId) {
         await axios.put(`http://localhost:5000/api/inventory/${editingId}`, payload);
-        toast.success("Item Updated Successfully! 📦");
+        toast.success("Inventory synchronization successful.");
       } else {
         await axios.post("http://localhost:5000/api/inventory", payload);
-        toast.success("New Item Added to Inventory! ➕");
+        toast.success("Data entry committed to master record.");
       }
       resetForm();
       fetchInventory();
-      setActiveTab('list'); // Switch back to list after adding
+      setActiveTab('list'); 
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save item.");
+      toast.error(error.response?.data?.message || "Critical Error: Transaction failed.");
     }
   };
 
-  const resetForm = () => {
-    setEditingId(null);
-    setFormData({ name: '', category: 'Lubricants & Fluids', price: '', quantityInStock: '', reorderLevel: '5' });
+  /**
+   * Real-time Stock Adjustment: Provides quick +/- increment controls
+   * Triggers reorder alerts instantly if thresholds are crossed
+   */
+  const handleQuantityAdjust = async (item, delta) => {
+    const newQty = item.quantityInStock + delta;
+    if (newQty < 0) return toast.error("Stock level cannot drop below zero.");
+
+    try {
+      await axios.put(`http://localhost:5000/api/inventory/${item._id}`, {
+        ...item,
+        quantityInStock: newQty
+      });
+      
+      // Update local state instantly for "Real-time" feel
+      setInventory(inventory.map(i => i._id === item._id ? { ...i, quantityInStock: newQty } : i));
+
+      // Trigger Alert System logic
+      if (newQty <= item.reorderLevel) {
+        toast("CRITICAL ALERT: Low stock detected for " + item.name, {
+          icon: '⚠️',
+          style: { background: '#991b1b', color: '#fff' }
+        });
+      }
+    } catch (error) {
+      toast.error("Adjustment failed: Persistent storage unreachable.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Verify: Move item to archive (Delete permanently?)")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/inventory/${id}`);
+      toast.success("Data record purged.");
+      fetchInventory();
+    } catch (error) {
+      toast.error("Cleanup failed.");
+    }
   };
 
   const handleEditClick = (item) => {
@@ -107,284 +157,195 @@ const InventoryModule = () => {
       quantityInStock: item.quantityInStock.toString(),
       reorderLevel: item.reorderLevel.toString()
     });
-    // --- NEW: Automatically switch to the Add/Edit tab when they click Edit ---
-    setActiveTab('add'); 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setActiveTab('add');
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to permanently delete this item?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/inventory/${id}`);
-        toast.success("Item Deleted.");
-        fetchInventory();
-      } catch (err) {
-        toast.error("Delete failed.");
-      }
-    }
+  const resetForm = () => {
+    setEditingId(null);
+    setFormData({ name: '', category: 'Lubricants & Fluids', price: '', quantityInStock: '', reorderLevel: '5' });
   };
 
-  // --- FILTER & CALCULATE LOGIC ---
-  const filteredInventory = inventory.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          item.itemId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory ? item.category === filterCategory : true;
-    return matchesSearch && matchesCategory;
-  });
-
+  // Logic: Determining visual UI state based on stock safety levels
   const getStatus = (qty, reorder) => {
-    if (qty === 0) return { label: "OUT OF STOCK", class: "status-out" };
-    if (qty <= reorder) return { label: "LOW STOCK", class: "status-low" };
-    return { label: "IN STOCK", class: "status-good" };
+    if (qty === 0) return { label: 'STOCK OUT', class: 'status-out' };
+    if (qty <= reorder) return { label: 'LOW STOCK', class: 'status-low' };
+    return { label: 'IN STOCK', class: 'status-ok' };
   };
 
-  // 1. Calculate Total Inventory Value (Stock sitting on shelves)
-  const totalInventoryValue = filteredInventory.reduce((sum, item) => sum + (item.price * item.quantityInStock), 0);
+  // Financial Analytical Calculations
+  const filteredInventory = inventory.filter(item => 
+    (item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     item.itemId.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterCategory === "" || item.category === filterCategory)
+  );
 
-  // 2. Calculate Total Sold Parts Value (Revenue generated from parts)
-  const totalSoldValue = records
-    .filter(r => r.status === 'Completed')
-    .reduce((sum, record) => {
-      const partsTotalForService = (record.usedParts || []).reduce((partSum, part) => partSum + (Number(part.totalPrice) || 0), 0);
-      return sum + partsTotalForService;
-    }, 0);
+  const totalInventoryValue = filteredInventory.reduce((sum, item) => sum + (item.price * item.quantityInStock), 0);
+  
+  // Calculate total historical revenue from parts used in service records
+  const totalSoldValue = records.reduce((sum, record) => sum + (record.partsCost || 0), 0);
 
   return (
-    <div>
-      <div className="module-header">
-        <h2>Inventory & Consumables</h2>
+    <div className="inventory-module fade-in">
+      <div className="module-header industrial-header">
+        <h2>Enterprise Resource Management</h2>
       </div>
 
-      {/* --- NEW: TAB CONTROLS --- */}
       <div className="tab-container">
-        <button className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`} onClick={() => setActiveTab('add')}>
-          {editingId ? "✏️ Edit Item" : "➕ Add New Item"}
+        <button 
+          className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`}
+          onClick={() => { resetForm(); setActiveTab('add'); }}
+        >
+          <Plus size={16} /> Data Entry
         </button>
-        <button className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`} onClick={() => { setActiveTab('list'); setEditingId(null); resetForm(); }}>
-          📦 Inventory List
+        <button 
+          className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
+          onClick={() => setActiveTab('list')}
+        >
+          <List size={16} /> Master Inventory
         </button>
-        <button className={`tab-btn ${activeTab === 'calc' ? 'active' : ''}`} onClick={() => { setActiveTab('calc'); setEditingId(null); }}>
-          🧮 Calculator
+        <button 
+          className={`tab-btn ${activeTab === 'calc' ? 'active' : ''}`}
+          onClick={() => setActiveTab('calc')}
+        >
+          <Calculator size={16} /> Fiscal Planner
         </button>
       </div>
 
-      <div className="tab-content-area" style={{ background: 'transparent', boxShadow: 'none', padding: 0 }}>
-        
-        {/* ======================================= */}
-        {/* TAB 1: ADD/EDIT FORM                    */}
-        {/* ======================================= */}
+      <div className="tab-content">
         {activeTab === 'add' && (
-          <div className="fade-in">
-            <div className="inventory-form-panel" style={{ maxWidth: '600px', margin: '0 auto' }}>
-              <h3 style={{ color: editingId ? '#f59e0b' : 'inherit', marginTop: 0 }}>
-                {editingId ? "✏️ Edit Inventory Item" : "📦 Add New Item"}
-              </h3>
-              
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label>Item Name</label>
-                  <input type="text" name="name" required value={formData.name} onChange={handleInputChange} placeholder="e.g., Mobil 1 Synthetic Oil" />
-                </div>
-
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label>Category</label>
-                  <select name="category" required value={formData.category} onChange={handleInputChange}>
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
-                </div>
-
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label>Selling Price (LKR)</label>
-                  <input type="text" name="price" required value={formData.price} onChange={handleNumberChange} placeholder="0.00" />
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
-                    <label>Qty in Stock</label>
-                    <input type="text" name="quantityInStock" required value={formData.quantityInStock} onChange={handleNumberChange} placeholder="0" />
-                  </div>
-                  <div className="input-group" style={{ flex: 1, marginBottom: 0 }}>
-                    <label>Reorder Alert</label>
-                    <input 
-                      type="text" 
-                      name="reorderLevel" 
-                      required 
-                      value={formData.reorderLevel} 
-                      onChange={handleNumberChange} 
-                      placeholder="5" 
-                      style={{ width: '100%', color: 'red' }}
-                    />
-                  </div>
-                </div>
-
-                <button type="submit" className="btn-submit" style={{ marginTop: '10px', background: editingId ? '#f59e0b' : 'var(--primary)' }}>
-                  {editingId ? "Update Item Data" : "Add to Inventory"}
-                </button>
-                
-                {editingId && (
-                  <button type="button" onClick={() => { resetForm(); setActiveTab('list'); }} style={{ padding: '10px', background: 'transparent', color: 'var(--danger)', border: '1px solid var(--danger)', borderRadius: '5px', cursor: 'pointer' }}>
-                    Cancel Edit
-                  </button>
-                )}
-              </form>
-            </div>
+          <div className="form-card-industrial">
+            <h3>{editingId ? "Modify Existing Stock Entry" : "Initialize New Material Record"}</h3>
+            <form onSubmit={handleSubmit} className="industrial-form">
+              <div className="input-group">
+                <label>Commercial Name</label>
+                <input type="text" name="name" required value={formData.name} onChange={handleInputChange} placeholder="e.g. Synthetic Engine Oil" />
+              </div>
+              <div className="input-group">
+                <label>Resource Classification</label>
+                <select name="category" value={formData.category} onChange={handleInputChange}>
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
+              <div className="input-group">
+                <label>Unit Valuation (LKR)</label>
+                <input type="text" name="price" required value={formData.price} onChange={handleNumberChange} placeholder="0.00" />
+              </div>
+              <div className="input-group">
+                <label>Initial Quantity</label>
+                <input type="text" name="quantityInStock" required value={formData.quantityInStock} onChange={handleNumberChange} placeholder="Qty" />
+              </div>
+              <div className="input-group">
+                <label>Reorder Threshold (Alert Trigger)</label>
+                <input type="text" name="reorderLevel" required value={formData.reorderLevel} onChange={handleNumberChange} placeholder="Min Count" />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn-primary-industrial">Commit Data</button>
+                {editingId && <button type="button" onClick={resetForm} className="btn-secondary">Abort Edit</button>}
+              </div>
+            </form>
           </div>
         )}
 
-        {/* ======================================= */}
-        {/* TAB 2: INVENTORY LIST & DIRECTORY       */}
-        {/* ======================================= */}
         {activeTab === 'list' && (
-          <div className="inventory-table-panel fade-in" style={{ padding: 0, border: 'none', boxShadow: 'none' }}>
-            
-            {/* SPLIT ASSET & SOLD BANNER */}
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#ecfdf5', padding: '15px 20px', borderRadius: '8px', border: '1px solid #a7f3d0' }}>
+          <div className="list-area fade-in">
+            <div className="analytical-summary">
+              <div className="analysis-card asset">
                 <div>
-                  <h3 style={{ margin: 0, color: '#065f46', fontSize: '1.1rem' }}>Current Asset Value</h3>
-                  <span style={{ fontSize: '0.8rem', color: '#047857' }}>Filtered stock value</span>
+                  <h4>Liquidation Value</h4>
+                  <p>Current holdings valuation</p>
                 </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#059669' }}>
-                  {totalInventoryValue.toLocaleString()} LKR
-                </div>
+                <div className="value-display">{totalInventoryValue.toLocaleString()} LKR</div>
               </div>
-              
-              <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff', padding: '15px 20px', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+              <div className="analysis-card revenue">
                 <div>
-                  <h3 style={{ margin: 0, color: '#1e3a8a', fontSize: '1.1rem' }}>Total Parts Sold</h3>
-                  <span style={{ fontSize: '0.8rem', color: '#1d4ed8' }}>From completed services</span>
+                  <h4>Cumulative Revenue</h4>
+                  <p>Materials utilized in operations</p>
                 </div>
-                <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#2563eb' }}>
-                  {totalSoldValue.toLocaleString()} LKR
-                </div>
+                <div className="value-display">{totalSoldValue.toLocaleString()} LKR</div>
               </div>
             </div>
 
-            <div className="table-controls" style={{ background: 'white', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '15px' }}>
-              <input 
-                type="text" 
-                className="search-input" 
-                placeholder="Search by Item ID or Name..." 
-                value={searchTerm} 
-                onChange={e => setSearchTerm(e.target.value)}
-                style={{ flex: 2, margin: 0 }}
-              />
-              <select 
-                className="search-input" 
-                value={filterCategory} 
-                onChange={e => setFilterCategory(e.target.value)}
-                style={{ flex: 1, margin: 0 }}
-              >
-                <option value="">All Categories</option>
+            <div className="filter-panel industrial-card">
+              <input type="text" placeholder="Search Master Records..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+                <option value="">All Resource Categories</option>
                 {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
             </div>
 
-            <div className="table-scroll-wrapper" style={{ background: 'white', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <table className="inventory-table">
+            <div className="inventory-grid">
+              <table className="industrial-table">
                 <thead>
                   <tr>
-                    <th>Item Code & Name</th>
-                    <th>Category</th>
-                    <th>Price (LKR)</th>
-                    <th style={{ textAlign: 'center' }}>Stock Level</th>
-                    <th style={{ textAlign: 'center' }}>Status</th>
-                    <th style={{ textAlign: 'right' }}>Actions</th>
+                    <th>Identifier & Description</th>
+                    <th>Price</th>
+                    <th style={{ textAlign: 'center' }}>Stock Adjustment</th>
+                    <th style={{ textAlign: 'center' }}>Metric Status</th>
+                    <th style={{ textAlign: 'right' }}>Management</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInventory.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="empty-state" style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
-                        No items found matching your criteria.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredInventory.map(item => {
-                      const status = getStatus(item.quantityInStock, item.reorderLevel);
-                      return (
-                        <tr key={item._id}>
-                          <td>
-                            <span className="id-badge" style={{ background: '#f1f5f9', color: '#475569', marginBottom: '5px', display: 'inline-block' }}>
-                              {item.itemId}
-                            </span>
-                            <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>{item.name}</div>
-                          </td>
-                          <td style={{ color: '#64748b' }}>{item.category}</td>
-                          <td style={{ fontWeight: '600' }}>{item.price.toLocaleString()}</td>
-                          
-                          <td style={{ textAlign: 'center' }}>
-                            <span className={`stock-count ${item.quantityInStock <= item.reorderLevel ? 'danger' : 'safe'}`}>
-                              {item.quantityInStock}
-                            </span>
-                            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Alert at {item.reorderLevel}</div>
-                          </td>
-                          
-                          <td style={{ textAlign: 'center' }}>
-                            <span className={`status-badge ${status.class}`}>
-                              {status.label}
-                            </span>
-                          </td>
-                          
-                          <td style={{ textAlign: 'right' }}>
-                            <button className="btn-edit" onClick={() => handleEditClick(item)} style={{ marginRight: '5px' }}>Edit</button>
-                            <button className="btn-delete" onClick={() => handleDelete(item._id)}>Del</button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                  {filteredInventory.map(item => {
+                    const status = getStatus(item.quantityInStock, item.reorderLevel);
+                    return (
+                      <tr key={item._id}>
+                        <td>
+                          <code className="code-id">{item.itemId}</code>
+                          <div className="item-name-bold">{item.name}</div>
+                          <span className="cat-tag">{item.category}</span>
+                        </td>
+                        <td className="price-col">{item.price.toLocaleString()}</td>
+                        
+                        <td className="adjust-col" style={{ textAlign: 'center' }}>
+                          <div className="qty-adjustment-ui">
+                            <button className="adjust-btn minus" onClick={() => handleQuantityAdjust(item, -1)}><MinusCircle size={20} /></button>
+                            <span className={`stock-val ${status.class}`}>{item.quantityInStock}</span>
+                            <button className="adjust-btn plus" onClick={() => handleQuantityAdjust(item, 1)}><PlusCircle size={20} /></button>
+                          </div>
+                          <div className="threshold-note">Threshold: {item.reorderLevel}</div>
+                        </td>
+                        
+                        <td style={{ textAlign: 'center' }}>
+                          <span className={`status-pill ${status.class}`}>{status.label}</span>
+                        </td>
+                        
+                        <td style={{ textAlign: 'right' }}>
+                          <button className="action-link edit" onClick={() => handleEditClick(item)}>Edit</button>
+                          <button className="action-link delete" onClick={() => handleDelete(item._id)}>Purge</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           </div>
         )}
 
-        {/* ======================================= */}
-        {/* TAB 3: QUICK CALCULATOR                 */}
-        {/* ======================================= */}
         {activeTab === 'calc' && (
-          <div className="fade-in">
-            <div style={{ maxWidth: '500px', margin: '0 auto', background: 'white', padding: '25px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-              <h3 style={{ marginTop: 0, color: '#1e293b', fontSize: '1.3rem', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #f1f5f9', paddingBottom: '15px', marginBottom: '20px' }}>
-                🧮 Quick Price Calculator
-              </h3>
-              
-              <div className="input-group" style={{ marginBottom: '15px' }}>
-                <label style={{ fontWeight: 'bold', color: '#475569' }}>Select Reference Item</label>
-                <select 
-                  value={calcItemPrice} 
-                  onChange={e => setCalcItemPrice(e.target.value)} 
-                  style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
-                >
-                  <option value="">-- Select an Item --</option>
-                  {inventory.map(i => (
-                    <option key={i._id} value={i.price}>{i.name} ({i.price.toLocaleString()} LKR)</option>
-                  ))}
-                </select>
+          <div className="calculator-area-industrial fade-in">
+            <div className="card-industrial">
+              <h3>Internal Cost Projection</h3>
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-end', marginTop: '20px' }}>
+                <div className="input-group" style={{ flex: 2 }}>
+                  <label>Select Template Resource</label>
+                  <select value={calcItemPrice} onChange={e => setCalcItemPrice(e.target.value)}>
+                    <option value="">-- Choose Item --</option>
+                    {inventory.map(i => <option key={i._id} value={i.price}>{i.name} ({i.price} LKR)</option>)}
+                  </select>
+                </div>
+                <div className="input-group" style={{ flex: 1 }}>
+                  <label>Projected Units</label>
+                  <input type="number" min="1" value={calcQty} onChange={e => setCalcQty(e.target.value)} />
+                </div>
               </div>
-              
-              <div className="input-group" style={{ marginBottom: '25px' }}>
-                <label style={{ fontWeight: 'bold', color: '#475569' }}>Multiplier (Qty)</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  value={calcQty} 
-                  onChange={e => setCalcQty(e.target.value)} 
-                  style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem' }} 
-                />
-              </div>
-              
-              <div style={{ paddingTop: '20px', background: '#f8fafc', padding: '20px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px dashed #cbd5e1' }}>
-                <span style={{ fontWeight: 'bold', color: '#64748b', fontSize: '1.1rem' }}>Estimated Value:</span>
-                <span style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--primary)' }}>
-                  {calcItemPrice ? (Number(calcItemPrice) * Number(calcQty)).toLocaleString() : "0"} LKR
-                </span>
+              <div className="calc-result-industrial">
+                <span className="label">Estimated Resource Cost:</span>
+                <span className="value">{(Number(calcItemPrice) * Number(calcQty)).toLocaleString()} LKR</span>
               </div>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

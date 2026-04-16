@@ -1,9 +1,11 @@
 /* src/index.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap');
 
 :root {
-  --primary: #2563eb;       
-  --primary-hover: #1d4ed8;
+  --primary: #1e293b;       /* Slate 800 */
+  --primary-hover: #0f172a; /* Slate 900 */
+  --accent: #2563eb;        /* Royal Blue */
+  --accent-hover: #1d4ed8;
   --secondary: #64748b;     
   --background: #f8fafc;    
   --surface: #ffffff;       
@@ -11,16 +13,69 @@
   --text-muted: #475569;
   --danger: #ef4444;        
   --success: #10b981;       
+  --warning: #f59e0b;
   
   --sidebar-width: 260px;
+  --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-body { background-color: var(--background); color: var(--text-main); }
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+  font-family: 'Inter', sans-serif; 
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Outfit', sans-serif;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+body { 
+  background-color: var(--background); 
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 4px; }
+
+/* Industrial Utilities */
+.card-industrial {
+  background: var(--surface);
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.btn-primary-industrial {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary-industrial:hover {
+  background: var(--primary-hover);
+}

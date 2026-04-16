@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { 
+  ClipboardList, 
+  Settings, 
+  History, 
+  Trash2, 
+  Play, 
+  User, 
+  Phone, 
+  CheckCircle, 
+  AlertCircle,
+  Package,
+  Wrench,
+  X
+} from 'lucide-react';
 import { toast } from "react-hot-toast";
 import "../../styles/BookingModule.css"; 
 import "../../styles/ServiceRecordModule.css";
@@ -86,7 +100,7 @@ const ServiceRecordModule = () => {
       };
       
       const res = await axios.post("http://localhost:5000/api/service-records/start", payload);
-      toast.success("Service Started! Vehicle moved to Active Bay. 🛠️");
+      toast.success("Service Started! Vehicle moved to Active Bay.");
       await fetchData();
       setActiveRecord(res.data);
       setActiveTab('bay');
@@ -197,7 +211,7 @@ const ServiceRecordModule = () => {
     
     try {
       await axios.put(`http://localhost:5000/api/service-records/${activeRecord._id}/complete`);
-      toast.success("Service Completed! Inventory updated. ✅");
+      toast.success("Service Completed! Inventory updated.");
       setActiveRecord(null);
       fetchData();
       setActiveTab('history');
@@ -235,13 +249,13 @@ const ServiceRecordModule = () => {
 
       <div className="tab-container">
         <button className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`} onClick={() => { setActiveTab('pending'); setActiveRecord(null); }}>
-          📌 Pending Schedule
+          <ClipboardList size={16} /> Pending Pipeline
         </button>
         <button className={`tab-btn ${activeTab === 'bay' ? 'active' : ''}`} onClick={() => setActiveTab('bay')}>
-          🔧 Active Bay ({activeServices.length})
+          <Settings size={16} /> Active Bay ({activeServices.length})
         </button>
         <button className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setActiveRecord(null); }}>
-          📜 Completed Records
+          <History size={16} /> Complete History
         </button>
       </div>
 

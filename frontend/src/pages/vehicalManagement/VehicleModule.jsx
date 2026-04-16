@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import "../../styles/CustomerModule.css"; // Reusing global form/table styles
-import "../../styles/VehicleModule.css";  // Vehicle specific styles
+import { PlusSquare, BookOpen, Phone, Save } from 'lucide-react';
+import "../../styles/CustomerModule.css"; 
 
 const VehicleModule = () => {
   // State for tabs: 'register' or 'directory'
@@ -154,13 +154,13 @@ const VehicleModule = () => {
           className={`tab-btn ${activeTab === 'register' ? 'active' : ''}`}
           onClick={() => { setActiveTab('register'); setEditVehicleId(null); }}
         >
-          ➕ Register Vehicle
+          <PlusSquare size={16} /> Register Vehicle
         </button>
         <button 
           className={`tab-btn ${activeTab === 'directory' ? 'active' : ''}`}
           onClick={() => setActiveTab('directory')}
         >
-          🚘 Vehicle Directory
+          <BookOpen size={16} /> Vehicle Directory
         </button>
       </div>
 
@@ -197,7 +197,7 @@ const VehicleModule = () => {
                     >
                       <div style={{ fontWeight: '600' }}>{c.firstName} {c.lastName}</div>
                       <div style={{ color: 'var(--secondary)', fontSize: '0.85rem' }}>NIC: {c.nic}</div>
-                      <div style={{ color: 'var(--secondary)', fontSize: '0.85rem' }}>📞 {c.phone}</div>
+                      <div style={{ color: 'var(--secondary)', fontSize: '0.85rem' }}><Phone size={14} style={{ marginRight: '5px' }} /> {c.phone}</div>
                     </div>
                   ))}
                   {filteredCustomers.length === 0 && (
@@ -269,7 +269,7 @@ const VehicleModule = () => {
                 </div>
                 
                 <button type="submit" className={`btn-submit ${editVehicleId ? 'update-mode' : ''}`}>
-                  {editVehicleId ? 'Update Vehicle' : '💾 Register Vehicle'}
+                  {editVehicleId ? 'Update Vehicle' : <><Save size={18} /> Register Vehicle</>}
                 </button>
                 
                 {/* Deselect Customer / Cancel Edit Button */}
