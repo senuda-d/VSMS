@@ -1,17 +1,13 @@
 const mongoose = require('mongoose');
 
 const billSchema = new mongoose.Schema({
-    serviceRecordId: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRecord', required: true, unique: true },
+    serviceRecordId: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceRecord', required: true },
     vehicleNumber: { type: String, required: true },
     customerName: { type: String, required: true },
-    
-    // Financials
-    serviceTotal: { type: Number, required: true }, // The finalTotal from the Service Record
-    additionalBillingCharges: { type: Number, default: 0 }, // Admin fees, late fees, etc.
+    serviceTotal: { type: Number, required: true },
+    additionalBillingCharges: { type: Number, default: 0 },
     discount: { type: Number, default: 0 },
-    grandTotal: { type: Number, required: true }, // serviceTotal + additional - discount
-    
-    // Workflow tracking
+    grandTotal: { type: Number, required: true },
     status: { type: String, enum: ['Draft', 'Finalized'], default: 'Draft' },
     finalizedAt: { type: Date }
 }, { timestamps: true });

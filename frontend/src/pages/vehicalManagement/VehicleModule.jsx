@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-// import './CustomerModule.css'; // Reusing global form/table styles
-import '../../styles/VehicleModule.css';  // Vehicle specific styles
+import "../../styles/CustomerModule.css"; // Reusing global form/table styles
+import "../../styles/VehicleModule.css";  // Vehicle specific styles
 
 const VehicleModule = () => {
   // State for tabs: 'register' or 'directory'

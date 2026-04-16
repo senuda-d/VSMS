@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import "../../styles/BookingModule.css";
+import "../../styles/BookingModule.css"; 
 
 const serviceOptions = [
   { name: "Full Body Wash", price: 3500, time: 30 }, 
@@ -13,7 +13,8 @@ const serviceOptions = [
 
 const availableSlots = [
   "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
-  "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM"
+  "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
+  "04:00 PM", "04:30 PM"
 ];
 
 const BookingModule = () => {
@@ -42,7 +43,7 @@ const BookingModule = () => {
   const [upcomingFilterDate, setUpcomingFilterDate] = useState("");
   const [upcomingFilterVehicle, setUpcomingFilterVehicle] = useState("");
 
-  // --- NEW: HISTORY FILTER STATES ---
+  //HISTORY FILTER STATES ---
   const [historyFilterDate, setHistoryFilterDate] = useState("");
   const [historyFilterVehicle, setHistoryFilterVehicle] = useState("");
 
@@ -100,6 +101,20 @@ const BookingModule = () => {
   maxDateObj.setMonth(maxDateObj.getMonth() + 3);
   const localMaxDate = maxDateObj.toLocaleDateString('en-CA');
 
+  //PREVENT PAST TIME BOOKINGS ---
+  const getCurrentMinutes = () => {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  };
+
+  const dynamicallyFilteredSlots = availableSlots.filter(slot => {
+    if (date === localToday) {
+      return timeToMinutes(slot) > getCurrentMinutes();
+    }
+    return true; 
+  });
+  // ---------------------------------------
+
   // Live Wizard Calculator
   useEffect(() => {
     let price = 0, time = 0;
@@ -121,11 +136,11 @@ const handleSubmit = async (e) => {
     e.preventDefault();
     if (step < 4) return;
 
-    // --- YOUR RESTORED OVERLAP CHECK LOGIC ---
+    //OVERLAP CHECK LOGIC ---
     const newStart = timeToMinutes(timeSlot);
     const newEnd = newStart + totalTime;
     
-    // Get all bookings for this specific date (ignoring the one we are editing)
+    // Get all bookings for this specific date
     const dayBookings = bookings.filter(b => b.date === date && b._id !== editingId);
 
     for (let b of dayBookings) {
@@ -133,11 +148,10 @@ const handleSubmit = async (e) => {
       const duration = parseInt(b.estimatedTime) || 0; 
       const existingEnd = existingStart + duration;
 
-      // The Overlap Formula: Does the new service start before the old one ends, 
-      // AND end after the old one starts?
+      // The Overlap Formula
       if (newStart < existingEnd && newEnd > existingStart) {
         toast.error(`⏱️ Time Conflict! Another vehicle is being serviced from ${b.timeSlot} until ${minutesToTime(existingEnd)}.`);
-        return; // This physically stops the form from submitting!
+        return; //physically stops the form from submitting!
       }
     }
     // ------------------------------------------
@@ -147,6 +161,7 @@ const handleSubmit = async (e) => {
       vehicle: selectedVehicle._id,
       vehicleNumber: selectedVehicle.licensePlate,
       customerName: `${selectedCustomer.firstName} ${selectedCustomer.lastName}`,
+      customerPhone: selectedCustomer.phone,
       selectedServices: checkedServices,
       totalPrice,
       estimatedTime: `${totalTime} mins`,
@@ -203,7 +218,7 @@ const handleSubmit = async (e) => {
 
   // --- UPCOMING LOGIC (Strictly > Today) ---
   const upcomingList = bookings.filter(b => {
-    if (b.date <= localToday) return false; // CHANGED: If it is today or earlier, it goes to history!
+    if (b.date <= localToday) return false; //If it is today or earlier it goes to history
     
     if (upcomingFilterDate && b.date !== upcomingFilterDate) return false;
     if (upcomingFilterVehicle && !b.vehicleNumber.toLowerCase().includes(upcomingFilterVehicle.toLowerCase())) return false;
@@ -447,7 +462,11 @@ const handleChat = (e) => {
                     <label className="bold-label" style={{ marginTop: '15px' }}>Select Start Time:</label>
                     <select required value={timeSlot} onChange={e => setTimeSlot(e.target.value)} className="search-box">
                       <option value="">-- Choose Time --</option>
-                      {availableSlots.map(s => <option key={s} value={s}>{s}</option>)}
+                      {dynamicallyFilteredSlots.length === 0 ? (
+                        <option value="" disabled>No more slots available today</option>
+                      ) : (
+                        dynamicallyFilteredSlots.map(s => <option key={s} value={s}>{s}</option>)
+                      )}
                     </select>
                   </div>
 
@@ -527,31 +546,40 @@ const handleChat = (e) => {
             {upcomingList.length === 0 ? (
                <div className="empty-state">No upcoming bookings match your filters.</div>
             ) : (
-              upcomingList.map(b => (
-                <div key={b._id} className="booking-ticket">
-                  <div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', marginBottom: '5px' }}>
-                      {b.date} &nbsp;|&nbsp; <span style={{ color: 'var(--primary)' }}>{b.timeSlot} — {getEndTimeFromDB(b.timeSlot, b.estimatedTime)}</span>
+              upcomingList.map(b => {
+                
+                const cust = customers.find(c => c._id === b.customer);
+
+                return (
+                  <div key={b._id} className="booking-ticket">
+                    <div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--text-main)', marginBottom: '5px' }}>
+                        {b.date} &nbsp;|&nbsp; <span style={{ color: 'var(--primary)' }}>{b.timeSlot} — {getEndTimeFromDB(b.timeSlot, b.estimatedTime)}</span>
+                      </div>
+                      <div style={{ fontSize: '1.1rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <span style={{ color: '#0369a1', fontWeight: 'bold', background: '#e0f2fe', padding: '4px 8px', borderRadius: '4px' }}>
+                          {b.vehicleNumber}
+                        </span> 
+                        <span>{b.customerName}</span>
+                        {/* --- NEW: Display the auto-loaded phone number --- */}
+                        <span style={{ color: 'var(--secondary)', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                          📞 {cust ? cust.phone : 'N/A'}
+                        </span>
+                      </div>
+                      <div style={{ marginTop: '8px', color: 'var(--secondary)' }}>
+                        {b.selectedServices.join(' • ')}
+                      </div>
                     </div>
-                    <div style={{ fontSize: '1.1rem' }}>
-                      <span style={{ color: '#0369a1', fontWeight: 'bold', background: '#e0f2fe', padding: '4px 8px', borderRadius: '4px', marginRight: '10px' }}>
-                        {b.vehicleNumber}
-                      </span> 
-                      {b.customerName}
-                    </div>
-                    <div style={{ marginTop: '8px', color: 'var(--secondary)' }}>
-                      {b.selectedServices.join(' • ')}
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '1.2rem' }}>{b.totalPrice.toLocaleString()} LKR</div>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <button className="btn-edit" onClick={() => handleEditClick(b)}>Edit</button>
+                        <button onClick={() => deleteBooking(b._id)} style={{ padding: '8px 15px', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
+                      </div>
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '1.2rem' }}>{b.totalPrice.toLocaleString()} LKR</div>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                      <button className="btn-edit" onClick={() => handleEditClick(b)}>Edit</button>
-                      <button onClick={() => deleteBooking(b._id)} style={{ padding: '8px 15px', background: 'var(--danger)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Cancel</button>
-                    </div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

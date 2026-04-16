@@ -6,9 +6,10 @@ const bookingSchema = new mongoose.Schema({
     customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
     vehicle: { type: mongoose.Schema.Types.ObjectId, ref: 'Vehicle', required: true },
     
-    // Quick-access strings (Keeps your Chatbot working perfectly!)
+    
     vehicleNumber: { type: String, required: true },
     customerName: { type: String, required: true },
+    
     
     selectedServices: { type: [String], required: true },
     totalPrice: { type: Number, required: true },

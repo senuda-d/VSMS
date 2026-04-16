@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import "./BookingModule.css"; 
+import "../../styles/BookingModule.css"; 
 import "../../styles/ServiceRecordModule.css";
 
 const ServiceRecordModule = () => {
@@ -18,6 +18,9 @@ const ServiceRecordModule = () => {
   const [selectedPartId, setSelectedPartId] = useState("");
   const [partQty, setPartQty] = useState(1);
   const [additionalCharges, setAdditionalCharges] = useState(0);
+  
+  // --- NEW: Track Completed Tasks ---
+  const [checkedTasks, setCheckedTasks] = useState([]);
 
   const localToday = new Date().toLocaleDateString('en-CA');
 
@@ -139,6 +142,26 @@ const ServiceRecordModule = () => {
     } catch (error) { toast.error("Failed to add part."); }
   };
 
+  // --- NEW: REMOVE MISTAKEN PART ---
+  const handleRemovePart = async (indexToRemove) => {
+    const partToRemove = activeRecord.usedParts[indexToRemove];
+    if (!window.confirm(`Remove ${partToRemove.partName} from the bill?`)) return;
+
+    const updatedPartsList = activeRecord.usedParts.filter((_, idx) => idx !== indexToRemove);
+    const newPartsCost = updatedPartsList.reduce((sum, p) => sum + p.totalPrice, 0);
+    const newFinalTotal = activeRecord.bookingCost + newPartsCost + (activeRecord.additionalCharges || 0);
+
+    try {
+      await axios.put(`http://localhost:5000/api/service-records/${activeRecord._id}`, {
+        usedParts: updatedPartsList,
+        partsCost: newPartsCost,
+        finalTotal: newFinalTotal
+      });
+      toast.success(`${partToRemove.partName} removed from bill.`);
+      fetchData();
+    } catch (error) { toast.error("Failed to remove part."); }
+  };
+
   // --- 3. UPDATE ADDITIONAL CHARGES ---
   const handleUpdateCharges = async () => {
     const charges = Number(additionalCharges);
@@ -154,8 +177,22 @@ const ServiceRecordModule = () => {
     } catch (error) { toast.error("Failed to update charges."); }
   };
 
+  // --- NEW: TOGGLE CHECKLIST TASK ---
+  const handleTaskToggle = (task) => {
+    if (checkedTasks.includes(task)) {
+      setCheckedTasks(checkedTasks.filter(t => t !== task));
+    } else {
+      setCheckedTasks([...checkedTasks, task]);
+    }
+  };
+
   // --- 4. COMPLETE SERVICE ---
   const handleCompleteService = async () => {
+    // --- NEW: VALIDATE ALL TASKS ARE CHECKED ---
+    if (checkedTasks.length !== activeRecord.servicesPerformed.length) {
+      return toast.error("⚠️ Please perform all tasks in the checklist before completing the service!");
+    }
+
     if (!window.confirm("Complete this service? This will deduct used parts from Inventory and generate the final bill.")) return;
     
     try {
@@ -340,7 +377,7 @@ const ServiceRecordModule = () => {
                       </div>
                       <div style={{ marginBottom: '15px' }}><b>Client:</b> {r.customerName}</div>
                       <div style={{ color: 'var(--secondary)', fontSize: '0.9rem', marginBottom: '15px' }}>Started: {r.serviceDate}</div>
-                      <button className="btn-submit" style={{ background: '#3b82f6', margin: 0 }} onClick={() => { setActiveRecord(r); setAdditionalCharges(r.additionalCharges || 0); }}>
+                      <button className="btn-submit" style={{ background: '#3b82f6', margin: 0 }} onClick={() => { setActiveRecord(r); setAdditionalCharges(r.additionalCharges || 0); setCheckedTasks([]); }}>
                         Open Live Workspace 🛠️
                       </button>
                     </div>
@@ -362,8 +399,15 @@ const ServiceRecordModule = () => {
                   <h4 style={{ color: 'var(--primary)', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>Tasks to Perform:</h4>
                   <div>
                     {activeRecord.servicesPerformed.map(task => (
-                      <label key={task} className="checklist-item">
-                        <input type="checkbox" /> {task}
+                      <label key={task} className="checklist-item" style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                        {/* --- NEW: Interactive Checkbox --- */}
+                        <input 
+                          type="checkbox" 
+                          checked={checkedTasks.includes(task)} 
+                          onChange={() => handleTaskToggle(task)} 
+                          style={{ transform: 'scale(1.2)' }}
+                        /> 
+                        {task}
                       </label>
                     ))}
                   </div>
@@ -386,10 +430,21 @@ const ServiceRecordModule = () => {
 
                   {activeRecord.usedParts?.length > 0 && (
                     <table className="parts-table">
-                      <thead><tr><th>Part</th><th>Qty</th><th>Total</th></tr></thead>
+                      {/* --- NEW: Added empty th for the delete button column --- */}
+                      <thead><tr><th>Part</th><th>Qty</th><th>Total</th><th style={{width: '30px'}}></th></tr></thead>
                       <tbody>
                         {activeRecord.usedParts.map((p, idx) => (
-                          <tr key={idx}><td>{p.partName}</td><td>x{p.quantity}</td><td>{p.totalPrice.toLocaleString()} LKR</td></tr>
+                          <tr key={idx}>
+                            <td>{p.partName}</td>
+                            <td>x{p.quantity}</td>
+                            <td>{p.totalPrice.toLocaleString()} LKR</td>
+                            {/* --- NEW: Delete Part Button --- */}
+                            <td style={{ textAlign: 'center' }}>
+                              <button onClick={() => handleRemovePart(idx)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem' }} title="Remove Part">
+                                ✕
+                              </button>
+                            </td>
+                          </tr>
                         ))}
                       </tbody>
                     </table>
@@ -415,7 +470,7 @@ const ServiceRecordModule = () => {
                   </div>
 
                   <button className="btn-submit" style={{ background: 'var(--success)', marginTop: '20px', height: '50px', fontSize: '1.1rem' }} onClick={handleCompleteService}>
-                    ✅ Complete Service & Generate Bill
+                    ✅ Complete Service 
                   </button>
 
                 </div>
