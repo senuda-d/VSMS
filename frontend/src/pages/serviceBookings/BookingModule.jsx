@@ -359,19 +359,19 @@ const handleChat = (e) => {
           className={`tab-btn ${activeTab === 'new' ? 'active' : ''}`}
           onClick={() => { setActiveTab('new'); resetForm(); }}
         >
-          <CalendarPlus size={16} /> New Booking
+          <CalendarPlus size={16} /> Add New
         </button>
         <button 
           className={`tab-btn ${activeTab === 'upcoming' ? 'active' : ''}`}
           onClick={() => setActiveTab('upcoming')}
         >
-          <ClipboardList size={16} /> Active Bookings
+          <ClipboardList size={16} /> Upcoming
         </button>
         <button 
           className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
-          <History size={16} /> Booking History
+          <History size={16} /> History
         </button>
       </div>
 

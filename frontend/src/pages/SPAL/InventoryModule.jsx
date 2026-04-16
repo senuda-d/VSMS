@@ -187,7 +187,7 @@ const InventoryModule = () => {
   return (
     <div className="inventory-module fade-in">
       <div className="module-header industrial-header">
-        <h2>Enterprise Resource Management</h2>
+        <h2>Inventory Control</h2>
       </div>
 
       <div className="tab-container">
@@ -195,52 +195,52 @@ const InventoryModule = () => {
           className={`tab-btn ${activeTab === 'add' ? 'active' : ''}`}
           onClick={() => { resetForm(); setActiveTab('add'); }}
         >
-          <Plus size={16} /> Data Entry
+          <Plus size={16} /> Add Item
         </button>
         <button 
           className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
           onClick={() => setActiveTab('list')}
         >
-          <List size={16} /> Master Inventory
+          <List size={16} /> View Stock
         </button>
         <button 
           className={`tab-btn ${activeTab === 'calc' ? 'active' : ''}`}
           onClick={() => setActiveTab('calc')}
         >
-          <Calculator size={16} /> Fiscal Planner
+          <Calculator size={16} /> Calculator
         </button>
       </div>
 
       <div className="tab-content">
         {activeTab === 'add' && (
           <div className="form-card-industrial">
-            <h3>{editingId ? "Modify Existing Stock Entry" : "Initialize New Material Record"}</h3>
+            <h3>{editingId ? "Edit Item" : "Add New Item"}</h3>
             <form onSubmit={handleSubmit} className="industrial-form">
               <div className="input-group">
-                <label>Commercial Name</label>
-                <input type="text" name="name" required value={formData.name} onChange={handleInputChange} placeholder="e.g. Synthetic Engine Oil" />
+                <label>Item Name</label>
+                <input type="text" name="name" required value={formData.name} onChange={handleInputChange} placeholder="e.g. Engine Oil" />
               </div>
               <div className="input-group">
-                <label>Resource Classification</label>
+                <label>Category</label>
                 <select name="category" value={formData.category} onChange={handleInputChange}>
                   {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
               </div>
               <div className="input-group">
-                <label>Unit Valuation (LKR)</label>
+                <label>Price (LKR)</label>
                 <input type="text" name="price" required value={formData.price} onChange={handleNumberChange} placeholder="0.00" />
               </div>
               <div className="input-group">
-                <label>Initial Quantity</label>
+                <label>In Stock</label>
                 <input type="text" name="quantityInStock" required value={formData.quantityInStock} onChange={handleNumberChange} placeholder="Qty" />
               </div>
               <div className="input-group">
-                <label>Reorder Threshold (Alert Trigger)</label>
-                <input type="text" name="reorderLevel" required value={formData.reorderLevel} onChange={handleNumberChange} placeholder="Min Count" />
+                <label>Reorder Level</label>
+                <input type="text" name="reorderLevel" required value={formData.reorderLevel} onChange={handleNumberChange} placeholder="Alert Level" />
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn-primary-industrial">Commit Data</button>
-                {editingId && <button type="button" onClick={resetForm} className="btn-secondary">Abort Edit</button>}
+                <button type="submit" className="btn-primary-industrial">Save Item</button>
+                {editingId && <button type="button" onClick={resetForm} className="btn-secondary">Cancel</button>}
               </div>
             </form>
           </div>

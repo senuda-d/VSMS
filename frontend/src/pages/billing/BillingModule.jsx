@@ -231,19 +231,19 @@ const BillingModule = () => {
           className={`tab-btn ${activeTab === 'ready' ? 'active' : ''}`}
           onClick={() => setActiveTab('ready')}
         >
-          <Receipt size={16} /> Pending Jobs ({unbilledServices.length})
+          <Receipt size={16} /> Pending ({unbilledServices.length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'drafts' ? 'active' : ''}`}
           onClick={() => setActiveTab('drafts')}
         >
-          <FileEdit size={16} /> Draft Invoices ({draftBills.length})
+          <FileEdit size={16} /> Drafts ({draftBills.length})
         </button>
         <button 
           className={`tab-btn ${activeTab === 'final' ? 'active' : ''}`}
           onClick={() => setActiveTab('final')}
         >
-          <FileCheck size={16} /> Payment History
+          <FileCheck size={16} /> History
         </button>
       </div>
 

@@ -238,24 +238,24 @@ const ServiceRecordModule = () => {
   return (
     <div>
       <div className="module-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Live Service Floor</h2>
+        <h2>Active Jobs</h2>
         {todaysTasks.length > 0 && (
           <div className="live-badge">
             <div className="blink-dot"></div>
-            {todaysTasks.length} Vehicles Scheduled Today
+            {todaysTasks.length} Bookings Today
           </div>
         )}
       </div>
 
       <div className="tab-container">
         <button className={`tab-btn ${activeTab === 'pending' ? 'active' : ''}`} onClick={() => { setActiveTab('pending'); setActiveRecord(null); }}>
-          <ClipboardList size={16} /> Pending Pipeline
+          <ClipboardList size={16} /> Bookings
         </button>
         <button className={`tab-btn ${activeTab === 'bay' ? 'active' : ''}`} onClick={() => setActiveTab('bay')}>
-          <Settings size={16} /> Active Bay ({activeServices.length})
+          <Settings size={16} /> Service Bay ({activeServices.length})
         </button>
         <button className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`} onClick={() => { setActiveTab('history'); setActiveRecord(null); }}>
-          <History size={16} /> Complete History
+          <History size={16} /> History
         </button>
       </div>
 
