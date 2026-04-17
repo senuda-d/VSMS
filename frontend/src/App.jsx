@@ -66,7 +66,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               to={item.path} 
               className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
               onClick={() => {
-                if (isOpen) toggleSidebar();
+                toggleSidebar();
               }}
             >
               <span className="nav-icon">{item.icon}</span>
