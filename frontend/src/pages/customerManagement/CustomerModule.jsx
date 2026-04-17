@@ -35,6 +35,11 @@ const CustomerModule = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Keep only digits
+    setFormData({ ...formData, phone: value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -119,7 +124,7 @@ const CustomerModule = () => {
           </div>
           <div className="input-group">
             <label>Phone</label>
-            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} required />
+            <input type="text" name="phone" value={formData.phone} onChange={handlePhoneChange} required />
           </div>
           <div className="input-group">
             <label>NIC</label>
