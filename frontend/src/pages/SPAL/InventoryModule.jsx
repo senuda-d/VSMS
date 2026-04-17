@@ -113,19 +113,22 @@ const InventoryModule = () => {
    * Triggers reorder alerts instantly if thresholds are crossed
    */
   const handleQuantityAdjust = async (item, delta) => {
+    const previousInventory = [...inventory];
     const newQty = item.quantityInStock + delta;
+    
     if (newQty < 0) return toast.error("Stock level cannot drop below zero.");
 
+    // 1. Optimistic Update: Update UI instantly
+    setInventory(prev => prev.map(i => i._id === item._id ? { ...i, quantityInStock: newQty } : i));
+
     try {
+      // 2. Persistent Storage Sync
       await axios.put(`http://localhost:5000/api/inventory/${item._id}`, {
         ...item,
         quantityInStock: newQty
       });
       
-      // Update local state instantly for "Real-time" feel
-      setInventory(inventory.map(i => i._id === item._id ? { ...i, quantityInStock: newQty } : i));
-
-      // Trigger Alert System logic
+      // 3. Alert System logic (post-sync)
       if (newQty <= item.reorderLevel) {
         toast("CRITICAL ALERT: Low stock detected for " + item.name, {
           icon: '⚠️',
@@ -133,7 +136,9 @@ const InventoryModule = () => {
         });
       }
     } catch (error) {
-      toast.error("Adjustment failed: Persistent storage unreachable.");
+      // 4. Revert state on failure
+      setInventory(previousInventory);
+      toast.error("Network Sync Error: Adjustment could not be saved.");
     }
   };
 

@@ -34,7 +34,8 @@ const DashboardModule = () => {
         ]);
 
         const customersCount = custRes.data.length;
-        const bookingsCount = bookRes.data.filter(b => b.status === 'Pending').length;
+        const todayDate = new Date().toLocaleDateString('en-CA');
+        const bookingsCount = bookRes.data.filter(b => b.status === 'Pending' && b.date >= todayDate).length;
         const pendingBillsCount = billRes.data.filter(b => b.status === 'Draft').length;
         const totalRevenue = billRes.data
           .filter(b => b.status === 'Finalized')
