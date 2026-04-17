@@ -20,4 +20,7 @@ const bookingSchema = new mongoose.Schema({
     status: { type: String, default: "Pending" }
 }, { timestamps: true });
 
+// Prevent double bookings at the database level for maximum security and race condition protection
+bookingSchema.index({ date: 1, timeSlot: 1 }, { unique: true });
+
 module.exports = mongoose.model("Booking", bookingSchema);

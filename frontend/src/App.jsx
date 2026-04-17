@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast'; 
 import { 
@@ -10,7 +10,8 @@ import {
   Package, 
   FileText, 
   Receipt,
-  LogOut
+  Menu,
+  X
 } from 'lucide-react';
 import '../src/styles/App.css';
 import '../src/styles/index.css';
@@ -29,7 +30,7 @@ import logoImg from './assets/logo.png';
  * Main Application Shell: Handles routing and global layouts.
  * Uses React Context / State for navigation persistence.
  */
-const Sidebar = () => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const navItems = [
     { path: '/', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
@@ -42,44 +43,64 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <img src={logoImg} alt="VSMS" className="sidebar-logo" />
-        <div className="brand-text">
-          <span className="brand-name">VSMS</span>
-          <span className="brand-sub">Enterprise</span>
+    <>
+      <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <div className="brand-header">
+            <img src={logoImg} alt="VSMS" className="sidebar-logo" />
+            <div className="brand-text">
+              <span className="brand-name">VSMS</span>
+              <span className="brand-sub">Enterprise</span>
+            </div>
+          </div>
+          <button className="mobile-close-btn" onClick={toggleSidebar}>
+            <X size={20} />
+          </button>
         </div>
-      </div>
-      
-      <nav className="sidebar-nav">
-        {navItems.map((item) => (
-          <Link 
-            key={item.path} 
-            to={item.path} 
-            className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-
-      <div className="sidebar-footer">
-        <button className="logout-btn">
-          <LogOut size={18} />
-          <span>Sign Out</span>
-        </button>
-      </div>
-    </aside>
+        
+        <nav className="sidebar-nav">
+          {navItems.map((item) => (
+            <Link 
+              key={item.path} 
+              to={item.path} 
+              className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+              onClick={() => {
+                toggleSidebar();
+              }}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+      </aside>
+    </>
   );
 };
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
     <Router>
       <div className="app-layout">
-        <Sidebar />
-        <main className="main-content">
+        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+          <header className="top-header">
+            <button className="hamburger-btn" onClick={toggleSidebar}>
+              <Menu size={24} />
+            </button>
+            <div className="header-title">
+              Vehicle Service Management System
+            </div>
+          </header>
+
           <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
           <div className="content-wrapper">
             <Routes>

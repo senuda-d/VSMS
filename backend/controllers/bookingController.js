@@ -32,15 +32,14 @@ const createBooking = async (req, res) => {
         if (bookingDate < today) return res.status(400).json({ message: "Security Block: Cannot book in the past." });
         if (bookingDate > maxDate) return res.status(400).json({ message: "Security Block: Max 3 months in advance." });
 
-        // Double Booking Check
-        const existingBooking = await Booking.findOne({ date, timeSlot });
-        if (existingBooking) return res.status(400).json({ message: "Time slot already booked!" });
-
         const newBooking = new Booking(req.body);
         await newBooking.save();
         res.status(201).json(newBooking);
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: "Time slot already booked!" });
+        }
         res.status(400).json({ message: error.message });
     }
 };

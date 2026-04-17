@@ -3,11 +3,15 @@ const Inventory = require('../models/Inventory');
 
 // Auto-generate INV-1001
 const generateItemId = async () => {
-    const lastItem = await Inventory.findOne().sort({ createdAt: -1 });
-    if (!lastItem) return 'INV-1001';
+    const lastItem = await Inventory.findOne({ itemId: /^INV-\d+$/ })
+        .sort({ createdAt: -1 });
+
+    if (!lastItem || !lastItem.itemId) return 'INV-1001';
     
-    // Extract the number part from "INV-1001" and add 1
-    const lastIdNumber = parseInt(lastItem.itemId.split('-')[1]);
+    const parts = lastItem.itemId.split('-');
+    const lastIdNumber = parseInt(parts[1]);
+    
+    if (isNaN(lastIdNumber)) return 'INV-1001';
     return `INV-${lastIdNumber + 1}`;
 };
 
