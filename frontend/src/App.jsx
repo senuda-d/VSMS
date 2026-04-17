@@ -9,8 +9,7 @@ import {
   CalendarClock, 
   Package, 
   FileText, 
-  Receipt,
-  LogOut
+  Receipt
 } from 'lucide-react';
 import '../src/styles/App.css';
 import '../src/styles/index.css';
@@ -64,12 +63,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      <div className="sidebar-footer">
-        <button className="logout-btn">
-          <LogOut size={18} />
-          <span>Sign Out</span>
-        </button>
-      </div>
+
     </aside>
   );
 };
